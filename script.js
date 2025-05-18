@@ -16,11 +16,12 @@ const snapBtn = document.getElementById('snap');
 const switchBtn = document.getElementById('switch-btn');
 const useBtn = document.getElementById('use-photo');
 const retakeBtn = document.getElementById('retake-photo');
-const finishBtn = document.getElementById('finish-btn');
-const stickerButtons = document.querySelectorAll('.sticker-btn');
+const saveBtn = document.getElementById('save-decorated');
+const stickerBtns = document.querySelectorAll('.sticker-btn');
 
 let currentFacing = "environment";
 let currentStream = null;
+let selectedSticker = null;
 
 // 📷 카메라 시작
 async function startCamera(facingMode) {
@@ -85,32 +86,42 @@ retakeBtn.addEventListener('click', () => {
   startCamera(currentFacing);
 });
 
-// ✅ 사용하기
+// ✅ 사용하기 → 꾸미기 페이지
 useBtn.addEventListener('click', () => {
-  const width = previewCanvas.width;
-  const height = previewCanvas.height;
-
-  decorateCanvas.width = width;
-  decorateCanvas.height = height;
-  decorateCtx.drawImage(previewCanvas, 0, 0);
-
   previewScreen.style.display = 'none';
   decorateScreen.style.display = 'block';
+
+  const width = previewCanvas.width;
+  const height = previewCanvas.height;
+  decorateCanvas.width = width;
+  decorateCanvas.height = height;
+
+  decorateCtx.drawImage(previewCanvas, 0, 0);
 });
 
-// ⭐️ 스티커 추가
-stickerButtons.forEach(button => {
-  button.addEventListener('click', () => {
-    const sticker = button.dataset.sticker;
-    decorateCtx.font = '64px serif';
-    const x = Math.random() * (decorateCanvas.width - 100);
-    const y = Math.random() * (decorateCanvas.height - 100);
-    decorateCtx.fillText(sticker, x, y);
+// ✨ 스티커 선택
+stickerBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    stickerBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedSticker = btn.dataset.sticker;
   });
 });
 
-// 🎉 완성!
-finishBtn.addEventListener('click', () => {
+// 🖱️ 스티커 붙이기
+decorateCanvas.addEventListener('click', (e) => {
+  if (!selectedSticker) return;
+
+  const rect = decorateCanvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  decorateCtx.font = "40px Arial";
+  decorateCtx.fillText(selectedSticker, x - 20, y + 10);
+});
+
+// 💾 저장하기
+saveBtn.addEventListener('click', () => {
   const link = document.createElement('a');
   link.download = 'decorated-photo.png';
   link.href = decorateCanvas.toDataURL();
