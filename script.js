@@ -17,7 +17,7 @@ const retakeBtn = document.getElementById('retake-photo');
 let currentFacing = "environment"; // 기본: 후면 카메라
 let currentStream = null;
 
-// 📷 카메라 시작
+// 📷 카메라 시작 (해상도 지정 → 일반 화각 유도)
 async function startCamera(facingMode) {
   if (currentStream) {
     currentStream.getTracks().forEach(track => track.stop());
@@ -25,7 +25,11 @@ async function startCamera(facingMode) {
 
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { exact: facingMode } },
+      video: {
+        facingMode: { exact: facingMode },
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      },
       audio: false
     });
     video.srcObject = stream;
@@ -60,8 +64,8 @@ snapBtn.addEventListener('click', () => {
   previewCanvas.width = width;
   previewCanvas.height = height;
 
-  // 전면이면 좌우 반전 해제
   if (currentFacing === "user") {
+    // 전면이면 좌우 반전 해제
     previewCtx.save();
     previewCtx.translate(width, 0);
     previewCtx.scale(-1, 1);
@@ -71,7 +75,6 @@ snapBtn.addEventListener('click', () => {
     previewCtx.drawImage(video, 0, 0, width, height);
   }
 
-  // 화면 전환
   cameraScreen.style.display = 'none';
   previewScreen.style.display = 'block';
 });
