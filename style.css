@@ -1,24 +1,54 @@
 body {
-  text-align: center;
+  margin: 0;
   font-family: sans-serif;
-  background: #f0f0f0;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #000;
+  color: #fff;
 }
 
-video, canvas {
-  max-width: 90%;
-  height: auto;
-  border: 2px solid #333;
+#camera-page, #photo-page {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+#start-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+#video-container {
+  position: relative;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+
+video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1.5); /* 🔍 1.5배 확대 */
+  object-fit: cover;
+  width: 100vw;
+  height: 100vh;
+}
+
+#capture-button, #switch-button, #confirm-button, #retake-button, #start-button {
   margin: 10px;
-}
-
-video.flip {
-  transform: scaleX(-1); /* 전면 카메라 미러 반전 */
-}
-
-button {
   padding: 10px 20px;
-  margin: 10px;
-  font-size: 16px;
-  cursor: pointer;
+  font-size: 18px;
+}
+
+#photo {
+  max-width: 100vw;
+  max-height: 100vh;
 }
