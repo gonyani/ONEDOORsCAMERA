@@ -23,7 +23,7 @@ video, canvas {
 }
 
 video.flip {
-  transform: scaleX(-1); /* 전면 카메라 미러 반전 */
+  transform: scaleX(-1);
 }
 
 button {
@@ -31,4 +31,14 @@ button {
   margin: 10px;
   font-size: 16px;
   cursor: pointer;
+}
+
+/* 꾸미기 도구 */
+.decorate-tools {
+  margin: 10px;
+}
+
+.sticker-btn {
+  font-size: 24px;
+  margin: 5px;
 }
