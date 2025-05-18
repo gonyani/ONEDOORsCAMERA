@@ -65,6 +65,12 @@ async function startCamera() {
   try {
     currentStream = await navigator.mediaDevices.getUserMedia(constraints);
     video.srcObject = currentStream;
+
+    // 카메라 종류에 따라 확대 설정
+    video.style.transform = usingFrontCamera
+      ? 'translate(-50%, -50%) scale(1)'
+      : 'translate(-50%, -50%) scale(1.5)';
+
   } catch (err) {
     alert('카메라를 사용할 수 없습니다: ' + err.message);
   }
