@@ -6,11 +6,19 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>📸 사진 꾸미기 웹사이트</h1>
+  <div id="start-screen">
+    <h1>📸 사진 꾸미기</h1>
+    <button id="start-btn">시작하기</button>
+  </div>
 
-  <video id="camera" autoplay></video>
-  <button id="snap">사진 찍기</button>
-  <canvas id="canvas"></canvas>
+  <div id="camera-screen" style="display: none;">
+    <video id="camera" autoplay playsinline></video>
+    <br>
+    <button id="switch-btn">카메라 전환</button>
+    <button id="snap">📷 사진 찍기</button>
+    <br>
+    <canvas id="canvas"></canvas>
+  </div>
 
   <script src="script.js"></script>
 </body>
