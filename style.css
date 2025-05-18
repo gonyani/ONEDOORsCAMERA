@@ -15,6 +15,7 @@ body {
   justify-content: center;
   width: 100vw;
   height: 100vh;
+  padding-bottom: 100px; /* 하단 버튼 여유 공간 확보 */
 }
 
 #start-page {
@@ -36,10 +37,10 @@ video {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) scale(1.5); /* 🔍 1.5배 확대 */
   object-fit: cover;
   width: 100vw;
   height: 100vh;
+  transform: translate(-50%, -50%);
 }
 
 #capture-button, #switch-button, #confirm-button, #retake-button, #start-button {
