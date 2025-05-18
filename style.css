@@ -11,3 +11,14 @@ video, canvas {
   border: 2px solid #333;
   margin: 10px;
 }
+
+video.flip {
+  transform: scaleX(-1); /* 전면 카메라 미러 반전 */
+}
+
+button {
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
