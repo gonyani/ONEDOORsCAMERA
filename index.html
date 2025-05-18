@@ -2,34 +2,28 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>사진 꾸미기</title>
+  <title>카메라 앱</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- 시작 화면 -->
-  <div id="start-screen">
-    <h1>📸 사진 꾸미기 웹사이트</h1>
-    <button id="start-btn">시작하기</button>
+  <div id="start-page">
+    <h1>카메라 꾸미기</h1>
+    <button id="start-button">시작하기</button>
   </div>
 
-  <!-- 카메라 화면 -->
-  <div id="camera-screen" style="display: none;">
-    <video id="camera" autoplay playsinline></video>
-    <br>
-    <button id="switch-btn">카메라 전환</button>
-    <button id="snap">📷 사진 찍기</button>
-    <br>
-    <canvas id="canvas" style="display: none;"></canvas>
+  <div id="camera-page">
+    <div id="video-container">
+      <video id="video" autoplay playsinline></video>
+    </div>
+    <button id="switch-button">카메라 전환</button>
+    <button id="capture-button">사진 찍기</button>
   </div>
 
-  <!-- 사진 확인 화면 -->
-  <div id="preview-screen" style="display: none;">
-    <h2>이 사진을 사용할까요?</h2>
-    <canvas id="preview-canvas"></canvas>
-    <br>
-    <button id="use-photo">사용하기</button>
-    <button id="retake-photo">다시 찍기</button>
+  <div id="photo-page">
+    <img id="photo" alt="찍은 사진 미리보기">
+    <button id="confirm-button">이 사진 사용하기</button>
+    <button id="retake-button">다시 찍기</button>
   </div>
 
   <script src="script.js"></script>
