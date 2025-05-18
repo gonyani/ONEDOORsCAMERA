@@ -5,6 +5,16 @@ body {
   padding: 20px;
 }
 
+header {
+  margin-bottom: 20px;
+}
+
+#logo {
+  width: 320px;
+  max-width: 90%;
+  height: auto;
+}
+
 video, canvas {
   max-width: 90%;
   height: auto;
