@@ -86,5 +86,4 @@ retakeBtn.addEventListener('click', () => {
 // ✅ 사용하기 (다음 단계로 연결 예정)
 useBtn.addEventListener('click', () => {
   alert("✅ 다음은 꾸미기 페이지로 넘어갈 거예요! (아직은 준비 중)");
-  // TODO: decorateScreen.style.display = 'block';
 });
