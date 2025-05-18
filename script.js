@@ -16,12 +16,15 @@ const snapBtn = document.getElementById('snap');
 const switchBtn = document.getElementById('switch-btn');
 const useBtn = document.getElementById('use-photo');
 const retakeBtn = document.getElementById('retake-photo');
+
+const decorateContainer = document.getElementById('decorate-container');
+const uploadInput = document.getElementById('sticker-upload');
+const deleteBtn = document.getElementById('delete-sticker');
 const saveBtn = document.getElementById('save-decorated');
-const stickerBtns = document.querySelectorAll('.sticker-btn');
 
 let currentFacing = "environment";
 let currentStream = null;
-let selectedSticker = null;
+let selectedStickerEl = null;
 
 // 📷 카메라 시작
 async function startCamera(facingMode) {
@@ -36,7 +39,6 @@ async function startCamera(facingMode) {
     });
     video.srcObject = stream;
     currentStream = stream;
-
     video.classList.toggle('flip', facingMode === "user");
   } catch (err) {
     alert("카메라를 사용할 수 없어요 😢");
@@ -86,7 +88,7 @@ retakeBtn.addEventListener('click', () => {
   startCamera(currentFacing);
 });
 
-// ✅ 사용하기 → 꾸미기 페이지
+// ✅ 사용하기 (꾸미기 화면으로 전환)
 useBtn.addEventListener('click', () => {
   previewScreen.style.display = 'none';
   decorateScreen.style.display = 'block';
@@ -99,31 +101,102 @@ useBtn.addEventListener('click', () => {
   decorateCtx.drawImage(previewCanvas, 0, 0);
 });
 
-// ✨ 스티커 선택
-stickerBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    stickerBtns.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    selectedSticker = btn.dataset.sticker;
+// 🖼️ 스티커 업로드
+uploadInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const img = document.createElement('img');
+  img.classList.add('sticker');
+  img.src = URL.createObjectURL(file);
+  img.style.left = '50px';
+  img.style.top = '50px';
+  img.style.width = '100px';
+
+  img.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    selectSticker(img);
   });
+
+  makeDraggable(img);
+  decorateContainer.appendChild(img);
 });
 
-// 🖱️ 스티커 붙이기
-decorateCanvas.addEventListener('click', (e) => {
-  if (!selectedSticker) return;
+// 🔴 선택 / 해제
+function selectSticker(el) {
+  if (selectedStickerEl) {
+    selectedStickerEl.classList.remove('selected');
+  }
+  selectedStickerEl = el;
+  selectedStickerEl.classList.add('selected');
+}
 
-  const rect = decorateCanvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-
-  decorateCtx.font = "40px Arial";
-  decorateCtx.fillText(selectedSticker, x - 20, y + 10);
+decorateContainer.addEventListener('click', () => {
+  if (selectedStickerEl) {
+    selectedStickerEl.classList.remove('selected');
+    selectedStickerEl = null;
+  }
 });
 
-// 💾 저장하기
+// 🗑️ 스티커 삭제
+deleteBtn.addEventListener('click', () => {
+  if (selectedStickerEl) {
+    selectedStickerEl.remove();
+    selectedStickerEl = null;
+  }
+});
+
+// 📦 드래그, 휠 확대/축소
+function makeDraggable(el) {
+  let offsetX, offsetY, isDragging = false;
+
+  el.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    offsetX = e.offsetX;
+    offsetY = e.offsetY;
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    el.style.left = `${e.pageX - decorateContainer.offsetLeft - offsetX}px`;
+    el.style.top = `${e.pageY - decorateContainer.offsetTop - offsetY}px`;
+  });
+
+  window.addEventListener('mouseup', () => {
+    isDragging = false;
+  });
+
+  // 크기 조절
+  el.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const scale = parseFloat(el.style.width) || 100;
+    const delta = e.deltaY > 0 ? -10 : 10;
+    const newSize = Math.max(30, scale + delta);
+    el.style.width = `${newSize}px`;
+  });
+}
+
+// 💾 저장
 saveBtn.addEventListener('click', () => {
+  const tempCanvas = document.createElement('canvas');
+  const tempCtx = tempCanvas.getContext('2d');
+
+  tempCanvas.width = decorateCanvas.width;
+  tempCanvas.height = decorateCanvas.height;
+  tempCtx.drawImage(decorateCanvas, 0, 0);
+
+  const stickers = document.querySelectorAll('.sticker');
+  stickers.forEach(sticker => {
+    const x = parseFloat(sticker.style.left);
+    const y = parseFloat(sticker.style.top);
+    const w = parseFloat(sticker.style.width);
+    const img = new Image();
+    img.src = sticker.src;
+    tempCtx.drawImage(img, x, y, w, w);
+  });
+
   const link = document.createElement('a');
   link.download = 'decorated-photo.png';
-  link.href = decorateCanvas.toDataURL();
+  link.href = tempCanvas.toDataURL();
   link.click();
 });
