@@ -40,3 +40,14 @@ button {
 .sticker.selected {
   border-color: red;
 }
+
+#sticker-toolbar img {
+  width: 60px;
+  margin: 5px;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+#sticker-toolbar img:hover {
+  border-color: blue;
+}
