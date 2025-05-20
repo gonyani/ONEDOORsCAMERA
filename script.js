@@ -9,6 +9,8 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const previewCanvas = document.getElementById('preview-canvas');
 const previewCtx = previewCanvas.getContext('2d');
+
+// 새로 정의된 final-canvas
 const decorateCanvas = document.getElementById('decorate-canvas');
 const decorateCtx = decorateCanvas.getContext('2d');
 
@@ -17,11 +19,12 @@ const switchBtn = document.getElementById('switch-btn');
 const useBtn = document.getElementById('use-photo');
 const retakeBtn = document.getElementById('retake-photo');
 const saveBtn = document.getElementById('save-decorated');
+const deleteBtn = document.getElementById('delete-sticker');
+const uploadInput = document.getElementById('sticker-upload');
 
 let currentFacing = "environment";
 let currentStream = null;
 
-// 카메라 시작
 async function startCamera(facingMode) {
   if (currentStream) {
     currentStream.getTracks().forEach(track => track.stop());
@@ -42,20 +45,20 @@ async function startCamera(facingMode) {
   }
 }
 
-// 시작 버튼 클릭
+// ▶ 시작하기
 startBtn.addEventListener('click', () => {
   startScreen.style.display = 'none';
   cameraScreen.style.display = 'block';
   startCamera(currentFacing);
 });
 
-// 카메라 전환
+// 🔄 카메라 전환
 switchBtn.addEventListener('click', () => {
   currentFacing = (currentFacing === "user") ? "environment" : "user";
   startCamera(currentFacing);
 });
 
-// 사진 찍기
+// 📸 사진 찍기
 snapBtn.addEventListener('click', () => {
   const width = video.videoWidth;
   const height = video.videoHeight;
@@ -77,14 +80,14 @@ snapBtn.addEventListener('click', () => {
   previewScreen.style.display = 'block';
 });
 
-// 다시 찍기
+// 🔁 다시 찍기
 retakeBtn.addEventListener('click', () => {
   previewScreen.style.display = 'none';
   cameraScreen.style.display = 'block';
   startCamera(currentFacing);
 });
 
-// 사진 사용하기
+// ✅ 사용하기
 useBtn.addEventListener('click', () => {
   previewScreen.style.display = 'none';
   decorateScreen.style.display = 'block';
@@ -92,10 +95,9 @@ useBtn.addEventListener('click', () => {
   decorateCanvas.width = previewCanvas.width;
   decorateCanvas.height = previewCanvas.height;
   decorateCtx.drawImage(previewCanvas, 0, 0);
-  drawAll();
 });
 
-// 저장
+// 💾 저장하기
 saveBtn.addEventListener('click', () => {
   const link = document.createElement('a');
   link.download = 'decorated_photo.png';
@@ -103,7 +105,42 @@ saveBtn.addEventListener('click', () => {
   link.click();
 });
 
-// 스티커 로딩
+// 🖼 스티커 처리
+let stickers = [];
+let selectedSticker = null;
+
+function drawAll() {
+  decorateCtx.clearRect(0, 0, decorateCanvas.width, decorateCanvas.height);
+  decorateCtx.drawImage(previewCanvas, 0, 0);
+
+  stickers.forEach(s => {
+    decorateCtx.drawImage(s.img, s.x, s.y, s.width, s.height);
+    if (s === selectedSticker) {
+      decorateCtx.strokeStyle = 'red';
+      decorateCtx.lineWidth = 2;
+      decorateCtx.strokeRect(s.x, s.y, s.width, s.height);
+    }
+  });
+}
+
+function createSticker(src) {
+  const img = new Image();
+  img.src = src;
+  img.onload = () => {
+    const scale = 0.3;
+    const width = img.width * scale;
+    const height = img.height * scale;
+    const x = (decorateCanvas.width - width) / 2;
+    const y = (decorateCanvas.height - height) / 2;
+
+    const sticker = { img, x, y, width, height, dragging: false, offsetX: 0, offsetY: 0 };
+    stickers.push(sticker);
+    selectedSticker = sticker;
+    drawAll();
+  };
+}
+
+// 📦 내장 스티커 등록
 const stickerList = [
   'CATBBI_1', 'CATBBI_2',
   'DALRING_1', 'DALRING_2',
@@ -113,64 +150,57 @@ const stickerList = [
   'WOONBABY_1', 'WOONBABY_2'
 ];
 
-const stickerToolbar = document.getElementById('sticker-toolbar');
-let stickers = [];
-
 stickerList.forEach(name => {
-  const img = document.createElement('img');
+  const img = new Image();
   img.src = `stickers/${name}.png`;
   img.className = 'sticker-preview';
   img.title = name;
+  img.style.width = '60px';
+  img.style.margin = '5px';
+  img.style.cursor = 'pointer';
 
-  img.addEventListener('click', () => {
-    const sticker = new Image();
-    sticker.src = img.src;
-    sticker.onload = () => {
-      const scale = 0.3;
-      const width = sticker.width * scale;
-      const height = sticker.height * scale;
+  img.addEventListener('click', () => createSticker(img.src));
 
-      const x = (decorateCanvas.width - width) / 2;
-      const y = (decorateCanvas.height - height) / 2;
-
-      const stickerObj = {
-        img: sticker,
-        x, y, width, height,
-        dragging: false,
-        offsetX: 0,
-        offsetY: 0
-      };
-      stickers.push(stickerObj);
-      drawAll();
-    };
-  });
-
-  stickerToolbar.appendChild(img);
+  document.body.appendChild(img); // 원하는 위치로 옮겨도 됨
 });
 
-// 드래그 이동
-decorateCanvas.addEventListener('mousedown', e => {
-  const rect = decorateCanvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
+// 📥 사용자 업로드 스티커
+uploadInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => createSticker(reader.result);
+  reader.readAsDataURL(file);
+});
 
+// 🗑️ 삭제 버튼
+deleteBtn.addEventListener('click', () => {
+  if (selectedSticker) {
+    stickers = stickers.filter(s => s !== selectedSticker);
+    selectedSticker = null;
+    drawAll();
+  }
+});
+
+// 🖱 PC 이벤트
+decorateCanvas.addEventListener('mousedown', e => {
+  const { x, y } = getCanvasPos(e);
   for (let i = stickers.length - 1; i >= 0; i--) {
     const s = stickers[i];
     if (x >= s.x && x <= s.x + s.width && y >= s.y && y <= s.y + s.height) {
       s.dragging = true;
       s.offsetX = x - s.x;
       s.offsetY = y - s.y;
+      selectedSticker = s;
       stickers.push(stickers.splice(i, 1)[0]);
+      drawAll();
       break;
     }
   }
 });
 
 decorateCanvas.addEventListener('mousemove', e => {
-  const rect = decorateCanvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-
+  const { x, y } = getCanvasPos(e);
   stickers.forEach(s => {
     if (s.dragging) {
       s.x = x - s.offsetX;
@@ -184,29 +214,62 @@ decorateCanvas.addEventListener('mouseup', () => {
   stickers.forEach(s => s.dragging = false);
 });
 
-// 스티커 삭제/크기 조절
-window.addEventListener('keydown', e => {
-  const selected = stickers[stickers.length - 1];
-  if (!selected) return;
-
-  if (e.key === 'Delete' || e.key === 'Backspace') {
-    stickers.pop();
-    drawAll();
-  } else if (e.key === '+' || e.key === '=') {
-    selected.width *= 1.1;
-    selected.height *= 1.1;
-    drawAll();
-  } else if (e.key === '-' || e.key === '_') {
-    selected.width *= 0.9;
-    selected.height *= 0.9;
-    drawAll();
+// 📱 모바일 터치 지원
+decorateCanvas.addEventListener('touchstart', e => {
+  const touch = e.touches[0];
+  const { x, y } = getCanvasPos(touch);
+  for (let i = stickers.length - 1; i >= 0; i--) {
+    const s = stickers[i];
+    if (x >= s.x && x <= s.x + s.width && y >= s.y && y <= s.y + s.height) {
+      s.dragging = true;
+      s.offsetX = x - s.x;
+      s.offsetY = y - s.y;
+      selectedSticker = s;
+      stickers.push(stickers.splice(i, 1)[0]);
+      drawAll();
+      break;
+    }
   }
 });
 
-function drawAll() {
-  decorateCtx.clearRect(0, 0, decorateCanvas.width, decorateCanvas.height);
-  decorateCtx.drawImage(previewCanvas, 0, 0);
+decorateCanvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const { x, y } = getCanvasPos(touch);
   stickers.forEach(s => {
-    decorateCtx.drawImage(s.img, s.x, s.y, s.width, s.height);
+    if (s.dragging) {
+      s.x = x - s.offsetX;
+      s.y = y - s.offsetY;
+      drawAll();
+    }
   });
+}, { passive: false });
+
+decorateCanvas.addEventListener('touchend', () => {
+  stickers.forEach(s => s.dragging = false);
+});
+
+// 🔍 크기 조절 키보드 (PC만 가능)
+window.addEventListener('keydown', e => {
+  if (!selectedSticker) return;
+  if (e.key === 'Delete' || e.key === 'Backspace') {
+    stickers = stickers.filter(s => s !== selectedSticker);
+    selectedSticker = null;
+  } else if (e.key === '+' || e.key === '=') {
+    selectedSticker.width *= 1.1;
+    selectedSticker.height *= 1.1;
+  } else if (e.key === '-' || e.key === '_') {
+    selectedSticker.width *= 0.9;
+    selectedSticker.height *= 0.9;
+  }
+  drawAll();
+});
+
+// 🧠 유틸: 좌표 계산
+function getCanvasPos(e) {
+  const rect = decorateCanvas.getBoundingClientRect();
+  return {
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top
+  };
 }
